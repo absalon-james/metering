@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Mypanel" %}{% endblock %}
+
+{% block page_header %}
+    {% include "horizon/common/_page_header.html" with title=_("Usage Panel") %}
+{% endblock page_header %}
+
+{% block main %}
+
+<script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+<script type="text/javascript">
+    google.charts.load('current', {packages: ['annotationchart']});
+</script>
+
+<form class="form-inline" action="?" method="get">
+    <h3>Select a period of time to query usage</h3>
+    <div class="datepicker form-group">
+        <label>From:</label>
+        <input type="text" data-date-format="yyyy-mm-dd" id="id_start" name="start" value="{{ start }}" />
+    </div>
+
+    <div class="datepicker form-group">
+        <label>To:</label>
+        <input type="text" data-date-format="yyyy-mm-dd" data-date-end-date="0d" id="id_end" name="end" value="{{ end }}" />
+    </div>
+
+    <div class="form-group">
+        <label>Tenant:</label>
+        <select id="id_tenant" name="tenant" class="form-control">
+            <option value="all">All Tenants</option>
+            {% for t in projects %}
+                {% if t.id == tenant %}
+                    <option value="{{ t.id }}" selected="selected">{{ t.name }}</option>
+                {% else %}
+                    <option value="{{ t.id }}">{{ t.name }}</option>
+                {% endif %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <button class="btn btn-primary" type="submit">Submit</button>
+</form>
+
+{% if vcpu_stats %}
+<div class="col-xs-12" style="height: 50px;"></div>
+<div class="col-xs-8" id="vcpu_id" style="height: 200px;"></div>
+<div class="col-xs-4"></div>
+{% endif %}
+
+{% if memory_stats %}
+<div class="col-xs-12" style="height: 50px;"></div>
+<div class="col-xs-8" id="memory_id" style="height: 200px;"></div>
+<div class="col-xs-4"></div>
+{% endif %}
+
+{% if storage_stats %}
+<div class="col-xs-12" style="height: 50px;"></div>
+<div class="col-xs-8" id="storage_id" style="height: 200px;"></div>
+<div class="col-xs-4"></div>
+{% endif %}
+
+<script type="text/javascript">
+{% if vcpu_stats %}
+google.charts.setOnLoadCallback(drawVCPUChart);
+function drawVCPUChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time');
+    data.addColumn('number', 'Active VCPUS');
+    data.addRows([
+        {% for s in vcpu_stats %}[new Date("{{ s|first }}"), {{ s|last }}]{% if not loop.last %},{% endif %}{% endfor %}
+    ]);
+    var chart = new google.visualization.AnnotationChart(document.getElementById('vcpu_id'));
+    var options = {
+        displayAnnotations: true,
+        displayZoomButtons: false,
+        displayRangeSelector: false
+    };
+    chart.draw(data, options);
+}
+{% endif %}
+
+{% if memory_stats %}
+google.charts.setOnLoadCallback(drawMemoryChart);
+function drawMemoryChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time');
+    data.addColumn('number', 'Active Memory in MB');
+    data.addRows([
+        {% for s in memory_stats %}[new Date("{{ s|first }}"), {{ s|last }}]{% if not loop.last %},{% endif %}{% endfor %}
+    ]);
+    var chart = new google.visualization.AnnotationChart(document.getElementById('memory_id'));
+    var options = {
+        displayAnnotations: true,
+        displayZoomButtons: false,
+        displayRangeSelector: false
+    };
+    chart.draw(data, options);
+}
+{% endif %}
+
+{% if storage_stats %}
+google.charts.setOnLoadCallback(drawStorageChart);
+function drawStorageChart() {
+    var data = new google.visualization.DataTable();
+    data.addColumn('date', 'Time');
+    data.addColumn('number', 'Active Local Storage in GB');
+    data.addRows([
+        {% for s in storage_stats %}[new Date("{{ s|first }}"), {{ s|last }}]{% if not loop.last %},{% endif %}{% endfor %}
+    ]);
+    var chart = new google.visualization.AnnotationChart(document.getElementById('storage_id'));
+    var options = {
+        displayAnnotations: true,
+        displayZoomButtons: false,
+        displayRangeSelector: false
+    };
+    chart.draw(data, options);
+}
+{% endif %}
+</script>
+{% endblock %}
