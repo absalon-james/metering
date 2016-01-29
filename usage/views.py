@@ -96,6 +96,11 @@ class IndexView(views.APIView):
 
         try:
             v_stats, m_stats, s_stats = self.dbdata(dbconf, start, end)
+            # @TODO - Fix this
+            # Data points are converted to string ease of templating.
+            v_stats = map(lambda s: '["{0}",{1}]'.format(s[0], s[1]), v_stats)
+            m_stats = map(lambda s: '["{0}",{1}]'.format(s[0], s[1]), m_stats)
+            s_stats = map(lambda s: '["{0}",{1}]'.format(s[0], s[1]), s_stats)
             context['vcpu_stats'] = v_stats
             context['memory_stats'] = m_stats
             context['storage_stats'] = s_stats
