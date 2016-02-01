@@ -12,7 +12,7 @@
 .axis path,
 .axis line {
     fill: none;
-    stroke: #000;
+    stroke: #bbb;
     shape-rendering: crispEdges;
 }
 
@@ -20,6 +20,10 @@
     fill: none;
     stroke: #428bca;
     stroke-width: 1.5px;
+}
+
+rect.background {
+    fill: #eee;
 }
 
 circle.y {
@@ -125,6 +129,12 @@ function graphanize(d3Container, data, yAxisLabel, yUnit) {
 
     x.domain(d3.extent(data, dateFn));
     y.domain(d3.extent(data, valueFn));
+
+    // Add rectangle to for background.
+    svg.append("rect")
+        .attr("width", width)
+        .attr("height", height)
+        .attr("class",  "background");
 
     // Add x axis
     svg.append("g")
