@@ -3,12 +3,12 @@ from django.utils.translation import ugettext_lazy as _
 import horizon
 
 
-class MeteringDashboard(horizon.Dashboard):
+class Metering(horizon.Dashboard):
     name = _('Metering')
     slug = 'metering'
-    panels = ('usage',)
+    panels = ('usage', 'underview')
     default_panel = 'usage'
     permissions = ('openstack.roles.admin',)
 
 
-horizon.register(MeteringDashboard)
+horizon.register(Metering)

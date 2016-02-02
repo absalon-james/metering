@@ -1,0 +1,14 @@
+{% load i18n sizeformat %}
+<form action="?" method="get" id="date_form" class="form-inline">
+  <h3>{% trans "Select a period of time to query its usage:" %}</h3>
+  <div class="datepicker form-group">
+    {% blocktrans with start=form.start %}
+    <label>From:</label> {{ start }}{% endblocktrans %}
+  </div>
+  <div class="datepicker form-group">
+    {% blocktrans with end=form.end %}
+    <label>To:</label>{{ end }}{% endblocktrans %}
+  </div>
+  <button class="btn btn-primary" type="submit">{% trans "Submit" %}</button>
+  <small>{% trans "The date should be in YYYY-mm-dd format." %}</small>
+</form>

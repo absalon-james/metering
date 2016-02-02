@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block title %}{% trans "Instance Underview" %}{% endblock %}
+
+{% block css %}
+{{ block.super }}
+{% include "metering/_graph_styling.html" %}
+{% endblock %}
+
+{% block main %}
+  {% if simple_tenant_usage_enabled %}
+    {% include "metering/underview/_usage_summary.html" %}
+    {% include "horizon/common/_limit_summary.html" %}
+    {% include "metering/_graphs.html" %}
+    {{ table.render }}
+  {% endif %}
+
+{% endblock %}
+
+{% block js %}
+  {{ block.super }}
+  {% include "metering/_graphs_js.html" %}
+{% endblock %}

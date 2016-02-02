@@ -1,0 +1,13 @@
+{% load i18n %}
+<div class="quota-dynamic">
+  <h3 class="quota-heading">{% trans "Usage Summary" %}</h3>
+</div>
+{% if usage.vcpu_stats %}
+<div id="vcpu_id" style="height: 200px;"></div>
+{% endif %}
+{% if usage.memory_stats %}
+<div id="memory_id" style="height: 200px;"></div>
+{% endif %}
+{% if usage.storage_stats %}
+<div id="storage_id" style="height: 200px;"></div>
+{% endif %}
