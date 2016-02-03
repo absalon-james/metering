@@ -5,8 +5,6 @@ from openstack_dashboard.dashboards.project.overview.views \
 from openstack_dashboard.usage import ProjectUsageTable
 from openstack_dashboard.usage import UsageView
 
-NANDY_DB_CONFIG = '/etc/nandy/db.yaml'
-
 
 class ProjectOverview(UsageView):
     table_class = ProjectUsageTable

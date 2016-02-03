@@ -8,38 +8,7 @@
 
 {% block css %}
 {{ block.super }}
-<style>
-.axis path,
-.axis line {
-    fill: none;
-    stroke: #bbb;
-    shape-rendering: crispEdges;
-}
-
-.line {
-    fill: none;
-    stroke: #428bca;
-    stroke-width: 1.5px;
-}
-
-rect.background {
-    fill: #eee;
-}
-
-circle.y {
-    stroke: #245681;
-    fill: none;
-    stroke-width: 2px;
-}
-
-text.graph-tooltip {
-    fill: #245681;
-    font-weight: 900;
-    font-size: 20pt;
-    stroke: white;
-    stroke-width: 1px;
-}
-</style>
+{% include "metering/_graph_styling.html" %}
 {% endblock %}
 
 {% block main %}
@@ -72,144 +41,26 @@ text.graph-tooltip {
     <button class="btn btn-primary" type="submit">Submit</button>
 </form>
 
-{% if vcpu_stats %}
+{% if usage.vcpu_stats %}
 <div class="col-xs-12" style="height: 50px;"></div>
 <div class="col-xs-8" id="vcpu_id" style="height: 200px;"></div>
 <div class="col-xs-4"></div>
 {% endif %}
 
-{% if memory_stats %}
+{% if usage.memory_stats %}
 <div class="col-xs-12" style="height: 50px;"></div>
 <div class="col-xs-8" id="memory_id" style="height: 200px;"></div>
 <div class="col-xs-4"></div>
 {% endif %}
 
-{% if storage_stats %}
+{% if usage.storage_stats %}
 <div class="col-xs-12" style="height: 50px;"></div>
 <div class="col-xs-8" id="storage_id" style="height: 200px;"></div>
 <div class="col-xs-4"></div>
 {% endif %}
-
 {% endblock %}
 
 {% block js %}
 {{ block.super }}
-<script type="text/javascript">
-var margin = {
-    top: 20,
-    right: 20,
-    bottom: 20,
-    left: 50
-}
-
-var date_format = d3.time.format('%d-%b-%y');
-var dateFn = function(d) { return new Date(d[0]); };
-var valueFn = function(d) { return d[1] };
-var bisectDate = d3.bisector(function(d) { return dateFn(d); }).left;
-
-function graphanize(d3Container, data, yAxisLabel, yUnit) {
-
-    var rect = d3Container.node().getBoundingClientRect();
-    var width = rect.width - margin.left - margin.right;
-    var height = rect.height - margin.top - margin.bottom;
-    var x = d3.time.scale().range([0, width]);
-    var y = d3.scale.linear().range([height, 0]);
-
-    var xAxis = d3.svg.axis().scale(x).orient('bottom');
-    var yAxis = d3.svg.axis().scale(y).orient('left');
-    var line = d3.svg.line()
-        .x(function(d) { return x(dateFn(d)); })
-        .y(function(d) { return y(valueFn(d)); });
-
-    var svg = d3Container.append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-    x.domain(d3.extent(data, dateFn));
-    y.domain(d3.extent(data, valueFn));
-
-    // Add rectangle to for background.
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .attr("class",  "background");
-
-    // Add x axis
-    svg.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-
-    // Add y axis
-    svg.append("g")
-        .attr("class", "y axis")
-        .call(yAxis)
-        .append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 6)
-        .attr("dy", "0.71em")
-        .style("text-anchor", "end")
-        .text(yAxisLabel);
-
-    // Add line
-    var lineSvg = svg.append("g");
-    lineSvg.append("path")
-        .datum(data)
-        .attr("class", "line")
-        .attr("d", line);
-
-    // Add focus group. Only visible on mouse over
-    var focus = svg.append("g")
-        .style("display", "none");
-    focus.append("circle")
-        .attr("class", "y")
-        .attr("r", 4);
-    focus.append("text")
-        .attr("x", 9)
-        .attr("class", "graph-tooltip");
-
-    // Add rectangle to capture mouse events.
-    svg.append("rect")
-        .attr("width", width)
-        .attr("height", height)
-        .style("fill", "none")
-        .style("pointer-events", "all")
-        .on("mouseover", function() {
-            focus.style("display", null);
-        })
-        .on("mouseout", function() {
-            focus.style("display", "none");
-        })
-        .on("mousemove", mousemove);
-
-    function mousemove() {
-        var x0 = x.invert(d3.mouse(this)[0]);
-        var i = bisectDate(data, x0, 1);
-        var d0 = data[i - 1];
-        var d1 = data[i];
-        var d = (x0 - (dateFn(d0)) > (dateFn(d1)) - x0) ? d1 : d0;
-        var newX = x(dateFn(d));
-        var newY = y(valueFn(d));
-        focus.attr("transform",
-              "translate(" + newX + "," + newY + ")");
-        var text = focus.select("text");
-        text.text("" + valueFn(d) + " " + yUnit);
-
-        // Side edge detection. Flip text to left if right boundary hit.
-        var focusBox = focus.node().getBBox();
-        if (focusBox.width + newX > width) {
-            text.attr("text-anchor", "end").attr("x", -9);
-        } else {
-            text.attr("text-anchor", "start").attr("x", 9);
-        }
-    }
-}
-$(function() {
-    graphanize(d3.select("#vcpu_id"), [{% autoescape off %}{{ vcpu_stats|join:"," }}{% endautoescape %}], 'Active VCPUS', "VCPUS");
-    graphanize(d3.select("#memory_id"), [{% autoescape off %}{{ memory_stats|join:"," }}{% endautoescape %}], 'Active Memory MB', "MB");
-    graphanize(d3.select("#storage_id"), [{% autoescape off %}{{ storage_stats|join:"," }}{% endautoescape %}], 'Active Storage GB', "GB");
-});
-</script>
+{% include "metering/_graphs_js.html" %}
 {% endblock %}
