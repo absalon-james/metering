@@ -5,8 +5,13 @@ from nandy.db import ActiveVCPUS as vcpus
 from nandy.db import ActiveMemoryMB as memory
 from nandy.db import ActiveLocalStorageGB as storage
 from nandy.db import db
+from nandy.db import Tenant as tenant
 
 NANDY_DB_CONFIG = '/etc/nandy/db.yaml'
+
+
+class NoDataForTenantError(Exception):
+    pass
 
 
 class NandyUsage(usage.ProjectUsage):
@@ -23,21 +28,34 @@ class NandyUsage(usage.ProjectUsage):
 
         db.get_engine(dbconf)
         with db.session_scope() as session:
+            tenant_query = session.query(tenant) \
+                .filter(tenant.uuid == self.project_id)
+
+            if not tenant_query.count():
+                raise NoDataForTenantError(
+                    "No data for tenant {0}.".format(self.project_id)
+                )
+
+            t = tenant_query.first()
+
             vcpu_stats = session.query(vcpus) \
                 .filter(vcpus.time >= start) \
-                .filter(vcpus.time <= end)
+                .filter(vcpus.time <= end) \
+                .filter(vcpus.tenant_id == t.id)
             vcpu_stats = map(stat, vcpu_stats)
 
             memory_stats = session.query(memory) \
                 .filter(memory.time >= start) \
-                .filter(memory.time <= end)
+                .filter(memory.time <= end) \
+                .filter(memory.tenant_id == t.id)
             memory_stats = map(stat, memory_stats)
 
             storage_stats = session.query(storage) \
                 .filter(storage.time >= start) \
-                .filter(storage.time <= end)
+                .filter(storage.time <= end) \
+                .filter(storage.tenant_id == t.id)
             storage_stats = map(stat, storage_stats)
-        return (vcpu_stats, memory_stats, storage_stats)
+            return (vcpu_stats, memory_stats, storage_stats)
 
     def add_nandy_data(self, start, end):
         # Get database configuration
@@ -58,6 +76,8 @@ class NandyUsage(usage.ProjectUsage):
             self.vcpu_stats = v_stats
             self.memory_stats = m_stats
             self.storage_stats = s_stats
+        except NoDataForTenantError as e:
+            messages.error(self.request, e)
         except:
             msg = 'Unable to read from nandy database.'
             messages.error(self.request, msg)

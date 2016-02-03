@@ -27,7 +27,6 @@
     <div class="form-group">
         <label>Tenant:</label>
         <select id="id_tenant" name="tenant" class="form-control">
-            <option value="all">All Tenants</option>
             {% for t in projects %}
                 {% if t.id == tenant %}
                     <option value="{{ t.id }}" selected="selected">{{ t.name }}</option>
@@ -40,24 +39,7 @@
 
     <button class="btn btn-primary" type="submit">Submit</button>
 </form>
-
-{% if usage.vcpu_stats %}
-<div class="col-xs-12" style="height: 50px;"></div>
-<div class="col-xs-8" id="vcpu_id" style="height: 200px;"></div>
-<div class="col-xs-4"></div>
-{% endif %}
-
-{% if usage.memory_stats %}
-<div class="col-xs-12" style="height: 50px;"></div>
-<div class="col-xs-8" id="memory_id" style="height: 200px;"></div>
-<div class="col-xs-4"></div>
-{% endif %}
-
-{% if usage.storage_stats %}
-<div class="col-xs-12" style="height: 50px;"></div>
-<div class="col-xs-8" id="storage_id" style="height: 200px;"></div>
-<div class="col-xs-4"></div>
-{% endif %}
+{% include "metering/_graphs.html" %}
 {% endblock %}
 
 {% block js %}

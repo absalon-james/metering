@@ -6,7 +6,7 @@ import horizon
 class Metering(horizon.Dashboard):
     name = _('Metering')
     slug = 'metering'
-    panels = ('usage', 'underview')
+    panels = ('usage', 'overview')
     default_panel = 'usage'
     permissions = ('openstack.roles.admin',)
 

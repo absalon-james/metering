@@ -9,7 +9,7 @@ from openstack_dashboard.usage import UsageView
 class ProjectOverview(UsageView):
     table_class = ProjectUsageTable
     usage_class = NandyUsage
-    template_name = 'metering/underview/usage.html'
+    template_name = 'metering/overview/usage.html'
     csv_response_class = ProjectUsageCsvRenderer
 
     def get_data(self):

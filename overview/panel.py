@@ -4,8 +4,8 @@ import horizon
 from openstack_dashboard.dashboards.metering import dashboard
 
 
-class Underview(horizon.Panel):
-    name = _("Underview")
-    slug = 'underview'
+class Overview(horizon.Panel):
+    name = _("Overview")
+    slug = 'overview'
 
-dashboard.Metering.register(Underview)
+dashboard.Metering.register(Overview)

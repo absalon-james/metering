@@ -5,13 +5,20 @@ from nandy.utils import date_from_string
 from nandy.utils import get_date_interval
 
 
+class AllTenant(object):
+    name = 'All Tenants'
+    id = '0' * 32
+
+ALL_TENANT = AllTenant()
+
+
 class IndexView(views.APIView):
     template_name = 'metering/usage/index.html'
 
     def get_data(self, request, context, *args, **kwargs):
 
         # Default selected tenant to special all tenant in nandy db
-        selected_tenant_id = request.GET.get('tenant', '0' * 32)
+        selected_tenant_id = request.GET.get('tenant', ALL_TENANT.id)
         context['tenant'] = selected_tenant_id
 
         # Default usage interval
@@ -38,6 +45,7 @@ class IndexView(views.APIView):
             tenant for tenant in
             request.user.authorized_tenants if tenant.enabled
         ]
+        projects.insert(0, ALL_TENANT)
         context['projects'] = projects
 
         usage = NandyUsage(request, selected_tenant_id)

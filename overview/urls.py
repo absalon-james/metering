@@ -20,11 +20,11 @@
 from django.conf.urls import patterns
 from django.conf.urls import url
 
-from openstack_dashboard.dashboards.metering.underview import views
+from openstack_dashboard.dashboards.metering.overview import views
 
 
 urlpatterns = patterns(
-    'openstack_dashboard.dashboards.metering.underview.views',
+    'openstack_dashboard.dashboards.metering.overview.views',
     url(r'^$', views.ProjectOverview.as_view(), name='index'),
     url(r'^warning$', views.WarningView.as_view(), name='warning'),
 )
